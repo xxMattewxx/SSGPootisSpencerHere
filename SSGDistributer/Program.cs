@@ -6,7 +6,7 @@ namespace SSGDistributer
     {
         static void Main(string[] args)
         {
-            int port = 967;
+            int port = 80;
             for (int i = 0; i < args.Length; i++)
             {
                 if (args[i].StartsWith("--port", StringComparison.InvariantCultureIgnoreCase))

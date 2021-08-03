@@ -2,17 +2,52 @@ version: "3.9"
    
 services:
   db:
+    container_name: SSG_db
+    restart: always
     image: postgres
     volumes:
-      - ./data/db:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - db-data:/var/lib/postgresql/data
     env_file: # this contains the configuation required by the app
       - .env
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "ssg"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - SSGNetwork
   web:
-    build: .
-    command: dotnet SSGDistributer.exe
-    volumes:
-      - .:/app
+    container_name: SSG_web
+    restart: always
+    build:
+      context: ./SSGDistributer
+      dockerfile: Dockerfile
+      args:
+        DATE: "03/08/2021"
+        REVISION: "1.00"
+    image: ssg_web:1.00
+    command: ./SSGDistributer --port 80
+    volumes: # this is where all the files will be served
+      - log-data:/app/data/logs
+      - static-data:/app/data/static
     ports:
       - "127.0.0.1:5001:80"
+    env_file: # this contains the configuation required by the app
+      - .env
+    links:
+      - db:SSGDB  # this is a local link for the db
     depends_on:
       - db
+    networks:
+      - SSGNetwork
+volumes:
+  db-data:
+    name: ssg_db_data
+  static-data:
+    name: ssg_static_data
+  log-data:
+      name: ssg_log_data
+networks:
+  SSGNetwork:
+    name: ssg_network
