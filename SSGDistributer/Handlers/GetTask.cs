@@ -71,7 +71,7 @@ namespace SSGDistributer.Handlers
                 return;
             }
 
-            writer.WriteLine(task);
+            writer.Write(task);
             return;
         }
     }
