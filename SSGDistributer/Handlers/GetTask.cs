@@ -29,7 +29,7 @@ namespace SSGDistributer.Handlers
                 using var command = conn.CreateCommand();
                 
                 command.CommandText = Global.dbtype switch {
-                    "PSQL" => "SELECT structure_seed,string_agg(CONCAT(mc_version, ' ', chunk_x,' ',chunk_z), ' ') " +
+                    "PSQL" => "SELECT structure_seed,string_agg(CONCAT(mc_version, ' ', chunk_x,' ',chunk_z), ' ' ORDER BY id) " +
                     "FROM seeds " +
                     "WHERE task_id = @taskID " +
                     "GROUP BY structure_seed " +
