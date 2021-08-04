@@ -34,7 +34,7 @@ namespace SSGDistributer.Handlers
                     "WHERE task_id = @taskID " +
                     "GROUP BY structure_seed " +
                     "LIMIT 300;",
-                    "MYSQL" => "SELECT structure_seed,GROUP_CONCAT(CONCAT(mc_version, ' ', chunk_x,' ',chunk_z) SEPARATOR ' ') " +
+                    "MYSQL" => "SELECT structure_seed,GROUP_CONCAT(CONCAT(mc_version, ' ', chunk_x,' ',chunk_z) ORDER BY id ASC SEPARATOR ' ') " +
                     "FROM seeds " +
                     "WHERE task_id = @taskID " +
                     "GROUP BY structure_seed " +
