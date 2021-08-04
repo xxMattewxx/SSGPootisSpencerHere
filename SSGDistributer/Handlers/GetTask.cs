@@ -19,7 +19,7 @@ namespace SSGDistributer.Handlers
             try
             {
                 var connection_string = Global.builder.ConnectionString;
-                DbConnection conn = Global.dbtype switch {
+                using DbConnection conn = Global.dbtype switch {
                     "PSQL" => new NpgsqlConnection(connection_string),
                     "MYSQL" => new MySqlConnection(connection_string),
                     _ => throw new Exception("Invalid db type " + Global.dbtype),
@@ -48,7 +48,7 @@ namespace SSGDistributer.Handlers
                 taskIdParam.DbType = System.Data.DbType.Int32;
                 command.Parameters.Add(taskIdParam);
 
-                DbDataReader reader = command.ExecuteReader();
+                using DbDataReader reader = command.ExecuteReader();
                 reader.Read();
 
                 if (!reader.HasRows)
