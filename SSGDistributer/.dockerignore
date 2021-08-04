@@ -1,0 +1,10 @@
+.git/
+.idea/
+Dockerfile
+.gitignore
+.gitlab
+.gitlab-ci.yml
+.editorconfig
+*.exe
+*.dll
+.env

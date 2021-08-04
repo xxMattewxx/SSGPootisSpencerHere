@@ -1,7 +1,9 @@
 ﻿using MySqlConnector;
+using Npgsql;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Data.Common;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -16,21 +18,37 @@ namespace SSGDistributer.Handlers
         {
             try
             {
-                using var conn = new MySqlConnection(Global.builder.ConnectionString);
+                var connection_string = Global.builder.ConnectionString;
+                DbConnection conn = Global.dbtype switch {
+                    "PSQL" => new NpgsqlConnection(connection_string),
+                    "MYSQL" => new MySqlConnection(connection_string),
+                    _ => throw new Exception("Invalid db type " + Global.dbtype),
+                };
                 conn.Open();
 
                 using var command = conn.CreateCommand();
-
-                command.CommandText = "" +
-                    "SELECT structure_seed,GROUP_CONCAT(CONCAT(mc_version, ' ', chunk_x,' ',chunk_z) SEPARATOR ' ') " +
+                
+                command.CommandText = Global.dbtype switch {
+                    "PSQL" => "SELECT structure_seed,string_agg(CONCAT(mc_version, ' ', chunk_x,' ',chunk_z), ' ') " +
                     "FROM seeds " +
                     "WHERE task_id = @taskID " +
                     "GROUP BY structure_seed " +
-                    "LIMIT 300;";
+                    "LIMIT 300;",
+                    "MYSQL" => "SELECT structure_seed,GROUP_CONCAT(CONCAT(mc_version, ' ', chunk_x,' ',chunk_z) SEPARATOR ' ') " +
+                    "FROM seeds " +
+                    "WHERE task_id = @taskID " +
+                    "GROUP BY structure_seed " +
+                    "LIMIT 300;",
+                    _ => throw new Exception("Invalid db type " + Global.dbtype),
+                }; 
+                    
+                DbParameter taskIdParam = command.CreateParameter();
+                taskIdParam.ParameterName = "@taskID";
+                taskIdParam.Value = taskID;
+                taskIdParam.DbType = System.Data.DbType.Int32;
+                command.Parameters.Add(taskIdParam);
 
-                command.Parameters.AddWithValue("@taskID", taskID);
-
-                MySqlDataReader reader = command.ExecuteReader();
+                DbDataReader reader = command.ExecuteReader();
                 reader.Read();
 
                 if (!reader.HasRows)
