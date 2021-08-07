@@ -27,20 +27,8 @@ namespace SSGDistributer.Handlers
                 conn.Open();
 
                 using var command = conn.CreateCommand();
-                
-                command.CommandText = Global.dbtype switch {
-                    "PSQL" => "SELECT structure_seed,string_agg(CONCAT(mc_version, ' ', chunk_x,' ',chunk_z), ' ' ORDER BY id) " +
-                    "FROM seeds " +
-                    "WHERE task_id = @taskID " +
-                    "GROUP BY structure_seed " +
-                    "LIMIT 300;",
-                    "MYSQL" => "SELECT structure_seed,GROUP_CONCAT(CONCAT(mc_version, ' ', chunk_x,' ',chunk_z) ORDER BY id ASC SEPARATOR ' ') " +
-                    "FROM seeds " +
-                    "WHERE task_id = @taskID " +
-                    "GROUP BY structure_seed " +
-                    "LIMIT 300;",
-                    _ => throw new Exception("Invalid db type " + Global.dbtype),
-                }; 
+
+                command.CommandText = "SELECT task_str FROM tasks WHERE task_id = @taskID LIMIT 1;";
                     
                 DbParameter taskIdParam = command.CreateParameter();
                 taskIdParam.ParameterName = "@taskID";
@@ -54,14 +42,7 @@ namespace SSGDistributer.Handlers
                 if (!reader.HasRows)
                     return null;
 
-                string ret = "";
-                do
-                {
-                    ret += reader.GetInt64(0) + " " + reader.GetString(1) + "\n";
-                }
-                while (reader.Read());
-
-                return ret;
+                return reader.GetString(0);
             }
             catch(Exception e)
             {
