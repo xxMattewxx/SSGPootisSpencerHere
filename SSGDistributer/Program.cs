@@ -17,6 +17,8 @@ namespace SSGDistributer
 
             APIServer apiServer = new APIServer(port);
             apiServer.AddAction("/tasks/get", Handlers.GetTask.ProcessContext);
+            apiServer.AddAction("/tasks/gethash", Handlers.GetHash.ProcessContext);
+            apiServer.AddAction("/tasks/getsize", Handlers.GetSize.ProcessContext);
             apiServer.Listen();
         }
     }
